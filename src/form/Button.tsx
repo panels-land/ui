@@ -1,101 +1,37 @@
-import type { Component, JSX } from 'solid-js'
-import {
-  createComputed,
-  onCleanup,
-  createSignal,
-  splitProps,
-  Show,
-} from 'solid-js'
+import { Show } from 'solid-js'
+import type { JSX, Component } from 'solid-js'
 
 import { Spinner } from '../Spinner'
-import { classList } from '../utils'
 
-export interface ButtonProps
-  extends Omit<
-    JSX.ButtonHTMLAttributes<HTMLButtonElement>,
-    'style' | 'onClick'
-  > {
-  size?: number
-  dark?: boolean
-  onClick?: (event: MouseEvent) => void | Promise<void>
-  spinnerDelay?: number
+interface ButtonProps extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
+  loading?: boolean
 }
 
-export const Button: Component<ButtonProps> = props => {
-  const [split, rest] = splitProps(props, [
-    'size',
-    'dark',
-    'onClick',
-    'children',
-    'disabled',
-    'spinnerDelay',
-    'className',
-    'classList',
-  ])
-  const [loading, setLoading] = createSignal(false)
-  const [showSpinner, setShowSpinner] = createSignal(false)
-
-  const handleClick = (event: MouseEvent) => {
-    const result = split.onClick?.(event)
-    if (result instanceof Promise) {
-      setLoading(true)
-      result.then(() => setLoading(false))
-    }
-  }
-
-  createComputed(() => {
-    if (loading()) {
-      const timeout = setTimeout(
-        () => setShowSpinner(true),
-        split.spinnerDelay ?? 300
-      )
-      onCleanup(() => clearTimeout(timeout))
-    }
-  })
-
-  return (
-    <button
-      type="button"
-      {...rest}
-      style={{
-        'flex-grow': split.size,
-      }}
-      disabled={loading() || split.disabled}
-      onClick={handleClick}
-      classList={classList(
-        `
-          flex-1
-          flex
-          items-center
-          justify-center
-          border-[1px]
-          bg-opacity-10
-          border-opacity-20
-          border-white
-          text-white
-          p-2
-          transition-all
-          active:bg-opacity-5
-          whitespace-nowrap
-          overflow-ellipsis
-        `,
-        split.dark ? 'bg-gray-500' : 'bg-white',
-        split.className,
-        split.classList
-      )}
+export const Button: Component<ButtonProps> = props => (
+  <button
+    {...props}
+    disabled={props.disabled || props.loading}
+    class={`p-2 rounded transition-all duration-300 uppercase relative ${
+      props.class ?? ''
+    }`}
+    classList={{
+      'text-lime-500 bg-lime-900 drop-shadow-lg bg-opacity-0 hover:bg-opacity-30':
+        !props.disabled && !props.loading,
+      'text-neutral-500 bg-neutral-900 cursor-not-allowed': props.disabled,
+      'text-lime-500 bg-lime-900 bg-opacity-0 cursor-wait': props.loading,
+    }}
+  >
+    <Show when={props.loading}>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <Spinner small color="rgb(132, 204, 22)" />
+      </div>
+    </Show>
+    <span
+      class={`transition-opacity ${
+        props.loading ? 'opacity-10' : 'opacity-100'
+      }`}
     >
-      <Show
-        when={!showSpinner()}
-        fallback={
-          <>
-            &nbsp;
-            <Spinner width={3} length={3} radius={4} lines={9} />
-            &nbsp;
-          </>
-        }
-      >
-        {props.children}
-      </Show>
-    </button>
-  )
-}
+      {props.children}
+    </span>
+  </button>
+)
