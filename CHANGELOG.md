@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/panels-land/ui/compare/v1.2.0...v1.2.1) (2021-12-16)
+
+
+### Bug Fixes
+
+* remove peer and optional from ghost pkg ([72a8618](https://github.com/panels-land/ui/commit/72a861896460435f03496d7fc57eb00b89052a44))
+
 # [1.2.0](https://github.com/panels-land/ui/compare/v1.1.0...v1.2.0) (2021-12-15)
 
 
