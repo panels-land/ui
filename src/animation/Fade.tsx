@@ -2,16 +2,18 @@ import type { Component } from 'solid-js'
 
 import { TransitionGroup } from './TransitionGroup'
 
-interface FadeProps {
+export interface FadeProps {
   appear?: boolean
   delay?: number
   duration?: number
   enterDuration?: number
   exitDuration?: number
+  ignore?: (el: HTMLElement) => boolean
 }
 
 export const Fade: Component<FadeProps> = props => (
   <TransitionGroup
+    ignore={props.ignore}
     appear={props.appear}
     enterState={(element, previousElement) => {
       element.style.setProperty(

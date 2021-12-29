@@ -15,10 +15,11 @@ export const Button: Component<ButtonProps> = props => (
       props.class ?? ''
     }`}
     classList={{
-      'text-lime-500 bg-lime-900 drop-shadow-lg bg-opacity-0 hover:bg-opacity-30':
+      'text-highlight-500 bg-highlight-900 drop-shadow-lg bg-opacity-0 hover:bg-opacity-30':
         !props.disabled && !props.loading,
       'text-neutral-500 bg-neutral-900 cursor-not-allowed': props.disabled,
-      'text-lime-500 bg-lime-900 bg-opacity-0 cursor-wait': props.loading,
+      'text-highlight-500 bg-highlight-900 bg-opacity-0 cursor-wait':
+        props.loading,
     }}
   >
     <Show when={props.loading}>

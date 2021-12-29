@@ -1,55 +1,131 @@
 import type { JSX } from 'solid-js'
+import { Show, createEffect, splitProps } from 'solid-js'
 
 import { useKeyboard } from '../Keyboard'
+import { createRef } from '../utils'
 
-interface TextFieldsProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
+export interface TextfieldsProps
+  extends JSX.InputHTMLAttributes<HTMLInputElement> {
   clearable?: boolean
+  error?: boolean | string
+  label?: string
 }
 
-export const Textfield = (props: TextFieldsProps) => {
-  const ref = useKeyboard()
+export const RawTextfield = (rawProps: TextfieldsProps) => {
+  const [props, rest] = splitProps(rawProps, [
+    'label',
+    'error',
+    'clearable',
+    'ref',
+  ])
 
-  let inputRef!: HTMLInputElement
+  const inputRef = createRef<HTMLInputElement>(props.ref)
+
+  createEffect(() => {
+    if (props.error) {
+      inputRef.setCustomValidity(
+        typeof props.error === 'string' ? props.error : 'Invalid'
+      )
+    } else {
+      inputRef.setCustomValidity('')
+    }
+  })
+
   return (
-    <div
-      class={`bg-black bg-opacity-30 rounded-md transition-all flex focus-within:bg-opacity-50 ${
-        props.class ?? ''
-      }`}
-    >
+    <div class="group relative">
       <input
-        {...props}
-        ref={input => {
-          inputRef = input
-          ref(input)
+        ref={inputRef}
+        class={`
+          bg-neutral-800
+          peer
+          rounded
+          p-2
+          ring-2
+          ring-highlight-700
+          invalid:ring-red-700
+          !ring-opacity-0
+          group-focus-within:!ring-opacity-100
+          duration-200
+          transition-all
+          w-full
+        `}
+        placeholder="&nbsp;"
+        classList={{
+          'pr-10': props.clearable,
         }}
-        placeholder="Search Term"
-        class="peer p-2 flex-grow text-white outline-none bg-transparent"
-        type={props.type || 'text'}
+        type="text"
+        {...rest}
       />
-      {props.clearable && (
+      <Show when={props.label || props.error}>
+        <label
+          class={`
+            absolute
+            -top-0.5
+            left-0
+            right-0
+            flex
+            -translate-y-full
+            text-highlight-500
+            peer-placeholder-shown:left-2
+            peer-placeholder-shown:right-2
+            peer-placeholder-shown:top-1/2
+            peer-placeholder-shown:-translate-y-1/2
+            peer-placeholder-shown:text-highlight-700
+            peer-invalid:text-red-500
+            pointer-events-none
+            transition-all
+            text-xs
+          `}
+        >
+          {props.label}
+          <span class="flex-grow text-right text-red-800 italic">
+            {props.error}
+          </span>
+        </label>
+      </Show>
+      <Show when={props.clearable}>
         <button
           type="button"
-          class="mr-2 transition-opacity opacity-0 peer-focus:opacity-100 peer-placeholder-shown:!opacity-0"
-          onClick={() => {
+          class={`
+            bottom-2
+            right-2
+            absolute
+            transition-opacity
+            opacity-0
+            text-highlight-500
+            peer-invalid:text-red-900
+            peer-focus:opacity-100
+            peer-placeholder-shown:!opacity-0
+          `}
+          onPointerDown={event => {
             inputRef.value = ''
             inputRef.dispatchEvent(new Event('change'))
             inputRef.blur()
+            event.preventDefault()
           }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
             <path
-              fill-rule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-              clip-rule="evenodd"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
         </button>
-      )}
+      </Show>
     </div>
   )
+}
+
+export const Textfield = (rawProps: TextfieldsProps) => {
+  const [props, rest] = splitProps(rawProps, ['ref'])
+  const ref = createRef(useKeyboard(), props.ref)
+  return <RawTextfield {...rest} ref={ref} />
 }

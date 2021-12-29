@@ -1,3 +1,5 @@
 src
 rollup.config.js
 tsconfig.json
+tailwind.config.cjs
+.github

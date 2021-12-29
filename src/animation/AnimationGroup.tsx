@@ -8,37 +8,48 @@ function nextFrame(fn: () => void) {
   })
 }
 
-interface AnimationGroupProps {
+export interface AnimationGroupProps {
   appear?: boolean
-  enterClassName?: string
-  enteringClassName?: string
-  exitClassName?: string
-  exitingClassName?: string
+  enterClass?: string
+  enteringClass?: string
+  exitClass?: string
+  exitingClass?: string
   willEnter?(el: HTMLElement): void
   onEnter(el: HTMLElement): void | Promise<any>
   onExit(el: HTMLElement): Promise<any> | void
   onExit(el: HTMLElement, done: () => void): void
-
+  ignore?: (el: HTMLElement) => boolean
   children?: JSX.Element
 }
 
 export const AnimationGroup: Component<AnimationGroupProps> = props => {
   const resolved = children(() => props.children)
-  const filtered = createMemo(() => {
+  const nodes = createMemo(() => {
     const nodes = resolved()
-    return (Array.isArray(nodes) ? nodes : [nodes]).filter(node => {
+    const filtered: Array<HTMLElement> = []
+    const ignored: Array<HTMLElement> = []
+
+    ;(Array.isArray(nodes) ? nodes : [nodes]).forEach(node => {
       if (!node) {
-        return false
+        return
       }
 
       if ((node as any).nodeType !== 1) {
         console.warn(
           `A child von AnimationGroup is not a HTMLElement (${node}) and will be ignored`
         )
-        return false
+        return
       }
-      return true
-    }) as Array<HTMLElement>
+
+      if (props.ignore?.(node as HTMLElement)) {
+        ignored.push(node as HTMLElement)
+        return
+      }
+
+      filtered.push(node as HTMLElement)
+    })
+
+    return { filtered, ignored }
   })
   const { willEnter, onEnter, onExit } = props
   const [combined, setCombined] = createSignal<Array<Element>>()
@@ -46,7 +57,7 @@ export const AnimationGroup: Component<AnimationGroupProps> = props => {
   let first = !props.appear
   const exiting = new Set<HTMLElement>()
   createEffect(() => {
-    const current = filtered()
+    const current = nodes().filtered
     const comb = [...current]
     const next = new Set(current)
     const prev = new Set(previous)
@@ -87,5 +98,10 @@ export const AnimationGroup: Component<AnimationGroupProps> = props => {
     first = false
   })
 
-  return combined
+  return (
+    <>
+      {combined()}
+      {nodes().ignored}
+    </>
+  )
 }

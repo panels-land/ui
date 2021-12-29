@@ -2,12 +2,13 @@ import type { Component } from 'solid-js'
 
 import { AnimationGroup } from './AnimationGroup'
 
-interface TransitionGroupProps {
+export interface TransitionGroupProps {
   appear?: boolean
   hide?: (element: HTMLElement) => void
   show?: (element: HTMLElement) => void
   enterState: (element: HTMLElement, previousElement?: HTMLElement) => void
   enteredState?: (element: HTMLElement) => void
+  ignore?: (el: HTMLElement) => boolean
   enterTransition: (
     element: HTMLElement,
     previousElement?: HTMLElement
@@ -38,6 +39,7 @@ export const TransitionGroup: Component<TransitionGroupProps> = props => {
 
   return (
     <AnimationGroup
+      ignore={props.ignore}
       appear={props.appear}
       willEnter={el => {
         const { animation: animationId = '' } = el.dataset

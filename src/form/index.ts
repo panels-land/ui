@@ -1,5 +1,4 @@
 export * from './Textfield'
-export * from './ButtonGroup'
 export * from './Button'
-export * from './Section'
 export * from './Headline'
+export * from './Switch'
