@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/panels-land/ui/compare/v1.2.1...v1.3.0) (2021-12-29)
+
+
+### Features
+
+* reworked all components ([f8d5d1b](https://github.com/panels-land/ui/commit/f8d5d1b4e8c2366221252d87c8c6371ce6a472e9))
+
 ## [1.2.1](https://github.com/panels-land/ui/compare/v1.2.0...v1.2.1) (2021-12-16)
 
 
